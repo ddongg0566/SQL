@@ -1,0 +1,144 @@
+CREATE TABLE superstore(
+--하나의 가게만 관리
+--VARCHAR2 _> 영어는 1byte, 한글은 3byte
+store_num NUMBER(5)PRIMARY KEY,
+store_name VARCHAR2(15)NOT NULL,
+store_add VARCHAR2(50) NOT NULL,
+store_phone CHAR(13),
+store_sales NUMBER(6) CHECK(store_sales>1000));
+
+DROP TABLE product;
+
+
+CREATE TABLE superproduct(
+product_num NUMBER(4) PRIMARY KEY, 
+product_name VARCHAR2(30),
+product_price NUMBER(5) CHECK(product_price>100),
+product_save CHAR(1) CHECK(product_save IN ('F','C')),
+store_num NUMBER(5), CONSTRAINT superstore_store_num_fk FOREIGN KEY (store_num) REFERENCES superstore(store_num)
+);
+
+
+INSERT INTO superstore
+VALUES(1234, 'THISISTUL', '대구시 중구','053-454-46464',2000);
+
+
+SELECT*
+from superstore;
+
+INSERT INTO superproduct
+VALUES(1000, '뀰', 2000, 'F', 1234);
+
+INSERT INTO superproduct
+VALUES(1001, '사과', 3000, 'C', 1234);
+
+INSERT INTO superproduct
+VALUES(1002, '고등어', 4000, 'F', 1234);
+
+INSERT INTO superproduct
+VALUES(1003, '만두', 10000, 'C', 1234);
+
+INSERT INTO superproduct
+VALUES(1004, '얼음', 500, 'F', 1234);
+
+SELECT*
+FROM user_constraints
+WHERE table_name='SUPERPRODUCT';
+
+
+SELECT*
+FROM superproduct;
+
+
+--제약조건 오류 찾는법
+SELECT cc.column_name, c.constraint_name
+FROM user_constraints c JOIN user_cons_columns cc
+ON(c.constraint_name =cc.constraint_name)
+WHERE c.table_name ='SUPERPRODUCT';
+
+--3) 회원
+-- 회원 아이디, 이름, 비번, 가게 번호
+--회원 아이디 15글자
+--회원 이름 9
+--회원 비밀번호 총 10글자
+--가게번호
+CREATE TABLE guest(
+user_id VARCHAR2(15) NOT NULL PRIMARY KEY,
+user_name VARCHAR2(9) NOT NULL, 
+user_pw VARCHAR2(10) NOT NULL,
+store_num NUMBER(5) REFERENCES superstore(store_num)
+);
+DROP TABLE guest;
+--4) 장바구니
+--주문번호, 상품번호, 물품 갯수, 가게 번호, 회원 번호, 배송 상태
+--주문번호 영문 +숫자 총 10글자
+--물품갯수 한자리수
+--배송상태 세가지 (준비(R), 배송중(D), 완료(F))
+--단 배송상태의 경우에는 기본값을 준비(r)로 가진다
+CREATE TABLE orderlist(
+order_num VARCHAR2(10) PRIMARY KEY,
+product_num NUMBER(4) REFERENCES superproduct(product_num),
+order_quantity NUMBER(1) NOT NULL,
+store_num NUMBER(5) REFERENCES superstore(store_num),
+user_id VARCHAR2(15) REFERENCES guest(user_id),
+order_stat CHAR(1) DEFAULT 'R'  CHECK(order_stat IN ('R' , 'F','D')) );
+drop table orderlist
+
+INSERT INTO guest
+VALUES('yedam001', '또치', 'yedam001', 1234);
+
+INSERT INTO guest
+VALUES('yedam002', '심치', 'yedam002', 1234);
+
+INSERT INTO guest
+VALUES('yedam003', '김치', 'yedam003', 1234);
+
+
+INSERT INTO orderlist
+values ('cart00001', 1000, 9, 1234, 'yedam001', 'R');
+
+INSERT INTO orderlist
+values ('cart00002', 1000, 8, 1234, 'yedam002', 'F');
+
+INSERT INTO orderlist
+values ('cart00003', 1001, 7, 1234, 'yedam003', 'R');
+
+INSERT INTO orderlist
+values ('cart00004', 1002, 9, 1234, 'yedam003', 'F');
+
+INSERT INTO orderlist
+values ('cart00005', 1003, 9, 1234, 'yedam002', 'F');
+
+INSERT INTO orderlist
+values ('cart00006', 1002, 9, 1234, 'yedam002', 'R');
+
+INSERT INTO orderlist
+values ('cart00007', 1003, 9, 1234, 'yedam002', 'F');
+
+SELECT *
+FROM orderlist;
+--1
+SELECT *
+FROM superstore
+where store_num ='1234';
+--2
+SELECT store_name, store_sales, product_name
+FROM  superproduct p JOIN superstore s
+on (s.store_num = p.store_num)
+where s.store_num= '1234' ;
+--3 털보네슈퍼의 주문 내역 조회
+-- 주문번호, 상품갯수, 상품명, 주문 금액, 배송 상태 조회
+SELECT o.order_num, p.product_name, (p.product_price * o.order_quantity), o.order_stat
+FROM orderlist o JOIN superproduct p on(o.product_num = p.product_num)
+JOIN superstore s on(s.store_num = p.store_num)
+where s.store_name = 'THISISTUL' ;
+--4.또치 회원의 주문 내역 조회
+--주문번호, 상품 갯수, 상품명, 주문 금액, 배송
+SELECT o.order_num, p.product_name, (p.product_price * o.order_quantity), o.order_stat
+FROM orderlist o JOIN superproduct p on(o.product_num = p.product_num)
+JOIN guest g on(g.user_id = o.user_id)
+where g.user_name = '또치' ;
+
+SELECT SUM(o.order_quantity)
+FROM orderlist o join superproduct p on (o.product_num = p.product_num)
+where p. product_name='뀰';

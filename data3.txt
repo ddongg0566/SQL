@@ -1,0 +1,138 @@
+SELECT *
+FROM employees;
+
+
+SELECt SUM(salary), Max(salary),MIN(salary),AVG(salary)
+FROM employees;
+
+
+--특정 부서별로도 가능하다
+SELECt SUM(salary), Max(salary),MIN(salary),AVG(salary)
+FROM employees
+WHERE department_id=60;
+
+--MIN==a ,,        max== z
+SELECT MIN(last_name), MAX(last_name)
+FROM employees;
+
+SELECT MIN(hire_date), MAX(hire_date)
+FROM employees;
+
+SELECT commission_pct
+FROM employees;
+
+
+--NVL는 NULL 항목의 열까지 모두 포함해서 평균을 낸다
+--COUNT 는 NULL 값의 항목의  열 갯수를 나타낸다
+SELECT AVG(commission_pct), AVG(NVL(commission_pct,0)) , COUNT(NVL(commission_pct,0))
+FROM employees;
+
+SELECT COUNT(*), COUNT(department_id), COUNT(DISTINCT department_id)
+FROM employees;
+
+
+SELECT AVG(commission_pct), AVG(NVL(commission_pct,0)), COUNT(commission_pct), SUM(commission_pct)/COUNT(NVL(commission_pct,0))
+FROM employees;
+
+SELECT department_id, MAX(salary)
+FROM employees
+GROUP BY  department_id;
+
+--GROUP by 절의 사용
+
+SELECT department_id, SUM(salary), COUNT(*)
+FROM employees
+GROUP BY department_id
+ORDER BY 1;
+
+SELECT department_id, job_id, SUM(salary), COUNT(*)
+FROM employees
+WHERE department_id>=50
+GROUP BY department_id, job_id
+ORDER BY 1, job_id;
+
+--Having
+SELECT department_id, job_id, SUM(salary), COUNT(*)
+FROM employees
+GROUP BY department_id, job_id
+HAVING  COUNT(*) <> 1
+ORDER BY 1, job_id;
+ 
+--GROUP 함수의 중첩
+
+SELECT MAX(SUM(Salary))
+FROM employees
+GROUP BY department_id;
+
+
+SELECT MAX(SUM(salary))
+FROM employees
+GROUP BY department_id;
+
+--join
+--caretessian product
+SELECT employee_id, last_name, department_name
+FROM employees, departments;
+--나쁜 예시
+SELECT count(*)
+FROM employees;
+
+
+--join 
+--1) Equi-join
+
+SELECT e.employee_id, e.last_name, e.department_id, d.department_id, d.location_id
+FROM employees e,  departments d
+WHERE e.department_id = d.department_id;
+
+--Departments 와 location 를 equi  조인을 활용해서 데이터 조회
+SELECT d.department_name, d.department_id, l.location_id, l.city
+FROM departments d, locations l
+WHERE d.location_id = l.location_id;
+
+--NON-EQUI join
+SELECT *
+FROM job_grades;
+
+SELECT e.employee_id, e.last_name, e.salary, j.grade_level
+FROM employees e, job_grades j
+WHERE e.salary BETWEEN j.lowest_sal AND HIGHEST_SAL;
+
+
+SELECT e.first_name, d.department_id, d.department_name
+FROM employees e, departments d
+WHERE e.department_id = d.department_id;
+
+SELECT e.first_name, d.department_name, e.salary
+FROM employees e, departments d
+WHERE  e.department_id = d.department_id and e.salary >=3000;
+
+--커미션을 받는 사원의 이름 직업 부서번호 부서명으 출력하시오
+SELECT e.first_name, e.job_id, d. department_id, d.department_name, e.commission_pct
+FROM employees e, departments d
+WHERE e.department_id = d.department_id and commission_pct is not null;
+
+--지역번호 2500 에서 근무하는 사원의 이름, 직업, 부서번호, 을 출력
+SELECT e.first_name, e.job_id, d.department_id, d.department_name, l.location_id
+FROM  employees e, departments d, locations l
+WHERE l.location_id = d.location_id and l.location_id =2500;
+
+--이름에 A가 들어가는 사원들의 이름과 부서이름을 출력하라
+SELECT e.first_name, d.department_name
+FROM employees e, departments d
+WHERE e.department_id = d.department_id and e.first_name like 'A%';
+
+-- 사원이름과 부서명과 월급을 출력하는데 월급이 3000 이상인 사원 출력
+SELECT e.first_name, d.department_name, e.salary
+FROM employees e, departments d
+WHERE e.department_id = d.department_id and e.salary >= 3000;
+
+--급여가 3000이상 5000사이인 사원의 이름과 소속부서명 출력
+SELECT e.first_name, d.department_name
+FROM employees e, departments d
+WHERE e.department_id = d.department_id and e.salary BETWEEN 3000 and 5000;
+
+--ACCounting 부서 소속 사원의 이름과 입사일을 출력하시오
+SELECT e.first_name, e.hire_date
+FROM employees e, departments d
+WHERE e.department_id = d.department_id and department_name like 'Accounting';

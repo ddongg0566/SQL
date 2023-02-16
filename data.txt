@@ -1,0 +1,264 @@
+DESC employees;
+
+SELECT *
+FROM employees;
+
+SELECT *
+FROM departments;
+
+
+SELECT department_id, department_name
+FROM departments;
+
+SELECT manager_id, location_id
+FROM departments;
+
+
+--산술 연산자
+
+
+
+
+
+
+
+
+
+SELECT last_name, salary, salary+100
+FROM employees;
+
+SELECT last_name, salary, 12*(salary+100), 12*salary+100
+FROM employees;
+
+
+
+-- 널 값과 산술연산
+
+
+SELECT last_name, job_id, salary, commission_pct
+FROM employees;
+
+SELECT last_name, 12*salary*commission_pct,commission_pct
+FROM employees;
+
+
+SELECT last_name, 100+salary*commission_pct,commission_pct
+FROM employees;
+
+--column ALias(별칭)
+SELECT last_name AS name, job_id JOB_ID, salary*12 "Annual_Sal"
+FROM employees;
+
+--연결 연산자(||)
+SELECT first_name, last_name, first_name || ' ' || last_name AS full_name
+FROM employees;
+
+SELECT employee_id||'-'||last_name||'''s Salary: ' || salary
+FROM employees;
+
+--Q 연산자로 가독성 증대
+SELECT employee_id||'-'||last_name||q'['s Salary:]'|| salary
+FROM employees;
+
+--DISTINT 사용으로 결과에서 중복제거
+SELECT department_id
+FROM employees;
+
+SELECT DISTINCT department_id
+FROM employees;
+
+SELECT DISTINCT department_id, job_id
+FROM employees;
+
+--where 기본적인 사용
+--department_id가 60인 정보만을 조회해 주세요.
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE department_id=60;
+
+SELECT last_name, job_id, department_id
+FROM employees
+WHERE last_name ='King';
+
+
+
+--날짜비교
+SELECT last_name, hire_date
+FROM employees;
+
+SELECT last_name, hire_date
+FROM employees
+WHERE hire_date ='1997/09/17';
+
+
+SELECT employee_id, salary, department_id
+FROM employees
+WHERE department_id <>90;
+
+SELECT last_name, salary
+FROM employees
+WHERE salary <=5000;
+
+SELECT last_name, hire_date
+FROM employees
+WHERE hire_date <'00/01/01';
+
+SELECT last_name, hire_date
+FROM employees
+WHERE last_name <'King';
+
+
+--BETWEEN 연산자의 사용
+SELECT last_name, salary
+FROM employees
+WHERE salary BETWEEN 8000 AND 7000;
+
+-- IN 연산자의 사용
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+--department_id =50 || department_id || department_id60
+WHERE department_id IN(50,60,80);
+
+
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE job_id IN('IT_PROG' , 'SA_REP');
+
+
+
+--like 연산자(패턴을 활용해서 조건에 맞는 데이터를 조회)
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE last_name LIKE'A%';
+
+
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE last_name LIKE'%a%';
+
+
+--last name 에서 첫글자는 아무거나 한개 존재하고 a로 시작하는 단어
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE last_name LIKE'__a%';
+
+
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE job_id LIKE'%SA\_%' ESCAPE'\';
+
+--널값 검색
+SELECT employee_id, last_name, job_id, manager_id
+FROM employees
+WHERE manager_id = null;
+
+SELECT employee_id, last_name, job_id, manager_id
+FROM employees
+WHERE manager_id is null;
+
+
+--논리 연산자의 사용
+SELECT employee_id, last_name, job_id, salary
+FROM employees
+WHERE job_id LIKE 'IT%'
+AND salary>8000;
+
+
+--not 연산자
+
+SELECT employee_id, last_name, manager_id
+FROM employees
+WHERE manager_id IS NOT NULL;
+
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE last_name NOT LIKE '%a%';
+
+SELECT last_name, salary
+FROM employees
+WHERE salary NOT BETWEEN 6000 AND 9000;
+
+SELECT employee_id, last_name, salary, department_id
+FROM employees
+WHERE department_id NOT IN (50,60,80);
+
+SELECT employee_id, last_name,job_id,salary
+FROM employees
+WHERE (job_id LIKE 'IT%'
+or job_id LIKE '%CLERK%')
+AND salary< 5000
+ORDER BY Employee_id;
+
+SELECT *
+FROM employees
+ORDER BY last_name;
+
+SELECT employee_id, last_name, hire_date, salary, department_id
+FROM employees
+ORDER BY department_id DESC, salary ASC ;
+
+
+--표현식 또는 별칭 기준 정렬
+SELECT employee_id, last_name, hire_date, salary*12 AS annsal, department_id
+FROM employees
+ORDER BY department_id, salary*12 DESC  ;
+
+SELECT employee_id, last_name, hire_date, salary*12 AS annsal, department_id
+FROM employees
+ORDER BY department_id, annsal DESC  ;
+
+
+SELECT *
+FROM employees
+ORDER BY 6;
+
+--UNION 집합,(합집합, 차집합, 교집합)
+
+SELECT employee_id FROM employees
+UNION
+SELECT employee_id FROM job_history;
+
+--UNION
+SELECT employee_id FROM employees
+UNION ALL
+SELECT employee_id FROM job_history;
+
+--MINUS
+SELECT employee_id FROM employees
+MINUS
+SELECT employee_id FROM job_history;
+
+--INTERSECT
+SELECT employee_id FROM employees
+INTERSECT
+SELECT employee_id FROM job_history;
+
+--치환 변수
+show verify
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE department_id=&dept_no;
+
+set verify on
+show verify
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE department_id=&dept_no;
+set verify off
+
+SELECT employee_id, last_name, job_id, department_id
+FROM employees
+WHERE job_id= UPPER('&job_title');
+
+SELECT employee_id, last_name, job_id, department_id & column_name
+FROM employees
+ORDER BY &column_name;
+
+define column_name;
+
+SELECT employee_id, last_name, job_id, department_id && column_name
+FROM employees
+ORDER BY &column_name;
+
+define column_name;
+undefine column_name;
